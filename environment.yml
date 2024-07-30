@@ -1,0 +1,22 @@
+# conda env create --file environment.yml
+name: 016-Manejo_de_NAs
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - fs
+  - jupyter
+  - jupyterlab
+  - pathlib
+  - polars
+  - pandas
+  - matplotlib
+  - numpy
+  - seaborn
+  - scipy
+  - statsmodels
+  - pip
+# - python=3.12.4
+  - pip:
+  

@@ -105,26 +105,94 @@ class MissingMethods:
 
         return table[table.n_variables > 0]
 
-    def row_summary(self):
+    def row_summary(self, span_size = 1):
         """Returns a Pandas Data Frame with: case (number of row), n_na (Number of NAs in case), prop_na (Proportion of NAs), prc_na (Percentage of NAs) """
+        
         n_na = np.array([self._df.iloc[i].isna().sum() for i in range(self._df.shape[0]) ])
         n_not_na = np.array([self._df.iloc[i].notna().sum() for i in range(self._df.shape[0]) ])
         prop_na = n_na / (n_na + n_not_na)
-        return pd.DataFrame.from_dict({
+        full_resume = pd.DataFrame.from_dict({
             "case": np.arange(self._df.shape[0]),
             "n_na": n_na,
             "n_not_na": n_not_na,
             "prop_na": prop_na,
             "prc_na": prop_na * 100
         })
-        
-        #return n_na
+        if span_size == 1:
+            return full_resume
+        elif span_size < 1 or type(span_size) != int:
+            raise ValueError(f"{span_size} is not a valid span size since is less than 1 or is not int.")
+        else:
+            breaks = np.arange(0, self._df.shape[0], span_size)
+            n_span = np.arange(len(breaks))
+            n_na = np.zeros(len(n_span))
+            n_not_na = np.zeros(len(n_span))
+            prop_na = np.zeros(len(n_span))
+            prc_na = np.zeros(len(n_span))
+            if breaks[-1] < self._df.shape[0]:
+                breaks = np.append(breaks, breaks[-1]+span_size)
             
+
+
+            for i in range(len(breaks) - 1):
+                n_na_instance = full_resume.iloc[breaks[i]:breaks[i+1]].n_na.sum()
+                n_na[i] = n_na_instance
+                n_not_na_instance = full_resume.iloc[breaks[i]:breaks[i+1]].n_not_na.sum()
+                n_not_na[i] = n_not_na_instance
+                prop_na_instance = n_na_instance / (n_na_instance + n_not_na_instance)
+                prop_na[i] = prop_na_instance
+                prc_na[i] = prop_na_instance * 100
+
+            return pd.DataFrame.from_dict({
+                "span": n_span,
+                "n_na": n_na,
+                "n_not_na": n_not_na,
+                "prop_na": prop_na,
+                "prc_na": prc_na
+            })
 
     def missing_case_summary(self):
         table = self.row_summary()
         return table[table.n_na > 0]
 
+    def streaks(self, var):
+        streak_type = []
+        array = []
+        last_streak = 0
+        last_na = 0
+        #for row in self._df[var]:
+        for i in range(self._df.shape[0]):
+
+            case = self._df[[var]].iloc[i].isna().bool()
+
+            # Final
+            if i == self._df.shape[0]-1:
+                last_streak += 1
+                array.append(last_streak)
+                streak_type.append("NA" if last_na else "Not NA")
+            
+            # Si es NA
+            elif case :
+                if last_na == False:
+                    array.append(last_streak)
+                    streak_type.append("NA")
+                    last_streak = 0
+                last_na = True
+                last_streak += 1
+
+            # Si NO es NA
+            elif case == False:
+                if last_na == True:
+                    array.append(last_streak)
+                    streak_type.append("Not NA")
+                    last_streak = 0
+                last_na = False
+                last_streak += 1
+
+        return pd.DataFrame.from_dict({
+            "Type": streak_type,
+            "Streak": array
+        })
 
 
 
@@ -140,7 +208,8 @@ if __name__ == "__main__":
     DF_TEST_MISSIGN.iloc[2:5, 0] = None
     DF_TEST_MISSIGN.iloc[6:7, 1] = None
     print("Probando la extension")
-    print(DF_TEST_MISSIGN.missing.row_summary())
+    print(DF_TEST_MISSIGN)
+    print(DF_TEST_MISSIGN.missing.streaks("a"))
 
 
 

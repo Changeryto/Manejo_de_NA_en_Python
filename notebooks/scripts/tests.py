@@ -59,6 +59,20 @@ class TestMissingMethods(unittest.TestCase):
             "prc_na": (0, 0, 50, 50, 50, 0, 50, 0, 0, 0)
         })
         self.assertEqual(DF_TEST_MISSIGN.missing.row_summary().to_dict(), wanted.to_dict())
+    
+    def test_row_summary_span(self):
+        wanted = pd.DataFrame.from_dict({
+            "span": (0,1),
+            "n_na": (3, 1),
+            "n_not_na": (7, 9),
+            "prop_na": ((3/10), (1/10)),
+            "prc_na": ((30), (10))
+        })
+        self.assertEqual(
+            DF_TEST_MISSIGN.missing.row_summary(5).to_dict(),
+            wanted.to_dict()
+        )
+
 
 if __name__ == "__main__":
     print(DF_TEST_MISSIGN)

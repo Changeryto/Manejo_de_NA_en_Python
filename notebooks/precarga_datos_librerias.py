@@ -1,6 +1,6 @@
 #!../../env/bin/python
 
-#import janitor
+import janitor
 import matplotlib.pyplot as plt
 import missingno
 import numpy as np

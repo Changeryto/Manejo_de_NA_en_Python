@@ -29,7 +29,28 @@ En algún momento va a hacer falta realizar preguntas por negocio u objetivos, p
 A travez de la racha puede intuirse que algo ha sucedido en ese momento.
 
 
+## Tipos de valores faltantes.
 
-## License
+Debe entenderse la diferencia para conocer el por qué de su falta.
 
+Por lo general hay 3.
 
+### Missing Completely at Random (MCAR)
+
+Debido a fallos de la medición sin responsabilidad otorgable.
+La localización de los valores faltantes en el conjunto de datos ocurre completamente al azar, sin dependencia de otrodato.
+
+### Missing at random (MAR)
+
+Debido a periodos de paro en la toma de mediciones en periodos conocidos.
+La localización de los valores faltantes en el conjunto de datos depende de otros valores observados.
+
+### Missing not at Random (MNAR)
+
+Difíciles de identificar.
+Debido a los límites de detección de las herramientas.
+La localización de los valores faltantes en el conjunto de datos dependen de los valores faltantes en sí mismos.
+
+__No se puede tener seguridad sobre qué mecanismo de valores faltantes es correcto para los datos.__
+
+Sin embargo, atravez del anális, exploración y el conocimiento dirigido, se pueden hacer suposiciones razonables.

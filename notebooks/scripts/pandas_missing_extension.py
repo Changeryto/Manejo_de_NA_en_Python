@@ -194,6 +194,20 @@ class MissingMethods:
             "Streak": array
         })
 
+    def sort_by_n_na(self):
+        return self.variable_summary().sort_values(by="n_not_na").reset_index().variable.pipe(lambda values : self._df[values.tolist()])
+
+    def bind_shadow_matrix(self):
+        nabular = self._df.isna().replace({
+            False: "Not_NA",
+            True: "NA"
+        }).add_suffix("_NA").pipe(
+            lambda nabular: pd.concat(
+                [self._df, nabular],
+                axis="columns"
+            )
+        )
+        return nabular
 
 
 if __name__ == "__main__":

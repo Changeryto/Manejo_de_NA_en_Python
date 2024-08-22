@@ -1,6 +1,7 @@
 #!../../env/bin/python
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 # Para borrar en caso de su existencia a .missing
 try:
@@ -152,10 +153,12 @@ class MissingMethods:
             })
 
     def missing_case_summary(self):
+        """Returns the row_summary() where there is at leat one na"""
         table = self.row_summary()
         return table[table.n_na > 0]
 
     def streaks(self, var):
+        """Returns a Pandas Data Frame with all the streaks and kind of streaks of the Data Frame"""
         streak_type = []
         array = []
         last_streak = 0
@@ -195,12 +198,14 @@ class MissingMethods:
         })
 
     def sort_by_n_na(self):
+        """Returns a Pandas Data Frame with the columns sorted by the number of NAs in it """
         return self.variable_summary().sort_values(by="n_not_na").reset_index().variable.pipe(lambda values : self._df[values.tolist()])
 
-    def bind_shadow_matrix(self):
+    def bind_shadow_matrix(self, false_NA_value="Not_NA", true_NA_value="NA"):
+        """Returns a Pandas Data Frame with Shadow Matrix """
         nabular = self._df.isna().replace({
-            False: "Not_NA",
-            True: "NA"
+            False: false_NA_value,
+            True: true_NA_value
         }).add_suffix("_NA").pipe(
             lambda nabular: pd.concat(
                 [self._df, nabular],
@@ -208,6 +213,74 @@ class MissingMethods:
             )
         )
         return nabular
+    
+    @classmethod
+    def column_fill_with_dummies(
+        cls,
+        column: pd.Series,
+        proportion_bellow: float=0.10,
+        jitter: float=0.015,
+        seed: int=42
+    ) -> pd.Series:
+        """ Returns a pandas series object, with dummy and jittered values"""
+        column = column.copy(deep=True)
+
+        # Extraer metadatos del valor
+        missing_mask = column.isna()
+        number_missing_values = missing_mask.sum()
+        column_range = column.max() - column.min()
+
+        # Shift de los datos
+        column_shift = column.min() - column.min()*proportion_bellow
+
+        # Crear el jitter noise al rededor de los puntos
+        np.random.seed(seed)
+        column_jitter = (np.random.rand(number_missing_values) - 2) * column_range * jitter
+
+        # Guardar conjunto de datos en nueva variable
+        column[missing_mask] = column_shift + column_jitter
+        
+        return column
+
+    def na_scatterplot(
+        self,
+        x: str,
+        y: str,
+        proportion_bellow: float=0.10,
+        jitter: float=0.015,
+        seed: int=42
+    ):
+        (
+            self._df
+            .select_dtypes(
+                exclude="category"
+            )
+            .pipe(
+                # Se atrae columnas con valores faltantes
+                lambda data : data[data.columns[data.isna().any()]]
+            )
+            .missing.bind_shadow_matrix(
+                false_NA_value = False,
+                true_NA_value = True
+            )
+            .apply(
+                lambda column: column if "_NA" in column.name else MissingMethods.column_fill_with_dummies(column, proportion_bellow=proportion_bellow, jitter=jitter, seed=seed)
+            )
+            .assign(
+                nullity = lambda df: df[f"{x}_NA"] | df[f"{y}_NA"]
+            )
+            .pipe(
+                lambda df: (
+                    sns.scatterplot(
+                        data = df,
+                        x=x,
+                        y=y,
+                        hue="nullity"
+                    )
+                )
+            )
+        )
+
 
 
 if __name__ == "__main__":

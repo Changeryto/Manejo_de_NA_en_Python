@@ -1,3 +1,31 @@
+# Como descargar y ejecutar esta notebook
+
+En un directorio vacío, ejecuta
+
+```sh
+git clone https://github.com/Changeryto/Manejo_de_NA_en_Python.git
+```
+
+Para crear el entorno virtual, ejecuta
+
+```sh
+python -m venv env
+```
+
+Activa el entorno virtual con
+
+```sh
+source env/bin/activate
+```
+
+Finalmente instala las dependencias con
+
+```sh
+pip install requirements.txt
+```
+
+Listo!
+
 # Manejo De NAs
 
 By/Por: Rubén Téllez Gerardo

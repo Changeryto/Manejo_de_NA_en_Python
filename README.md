@@ -1,4 +1,4 @@
-# Como descargar y ejecutar esta notebook
+# Como descargar y ejecutar este proyecto.
 
 En un directorio vacío, ejecuta
 
